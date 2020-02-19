@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[101]:
 
 
 import requests
@@ -17,26 +17,26 @@ import random
 import csv
 
 
-# In[3]:
+# In[102]:
 
 
 #defining the url and using the ureq to read the website in html. This can be checked by print(canadavisa)
 
 
-# In[4]:
+# In[103]:
 
 
 canadavisa_url = 'https://www.canadavisa.com/canada-immigration-discussion-board/'
 canadavisa = requests.get(canadavisa_url).text
 
 
-# In[5]:
+# In[104]:
 
 
 #all topics are in tag 'h3' - using bs to find all data in h3 - Topic tag has changed from nodeTitle to node-title
 
 
-# In[6]:
+# In[105]:
 
 
 soup = bs(canadavisa, 'html.parser')
@@ -49,13 +49,13 @@ print(topic_titles_and_links)
 
 # LM's example of randomised topic selection. Uses [sampling without replacement](https://web.ma.utexas.edu/users/parker/sampling/repl.htm) to ensure the same topic is not selected twice .
 
-# In[7]:
+# In[106]:
 
 
 topic_titles_and_links
 
 
-# In[8]:
+# In[107]:
 
 
 with open('titles_and_links.csv', mode='w') as csv_file:
@@ -67,35 +67,35 @@ with open('titles_and_links.csv', mode='w') as csv_file:
         writer.writerow({'title': key, 'link': value})
 
 
-# In[9]:
+# In[108]:
 
 
 def sample_links(titles_and_links, titles, sample_size):
-    num_links = len(titles_and_links)
-    sample_titles_and_links = {}
-    ids = []
+   num_links = len(titles_and_links)
+   sample_titles_and_links = {}
+   ids = []
 
-    # This code creates an array of topic ids that are random and unique
-    if sample_size < num_links:
-        for i in range(0, sample_size):
-            x = -1
-            # 
-            while not(x in ids):
-                x = random.randint(0, num_links)
-                ids.append(x)
-            print(i, x)
+   #This code creates an array of topic ids that are random and unique
+   if sample_size < num_links:
+       for i in range(0, sample_size):
+           x = -1
+            
+           while not(x in ids):
+               x = random.randint(0, num_links)
+               ids.append(x)
 
-    # Now create the topic sample
-    if len(ids) > 0:
-        for i in ids:
-            key = titles[i]
-            sample_titles_and_links[key] = titles_and_links[key]
+   # Now create the topic sample
+   if len(ids) > 0:
+       for i in ids:
+           if (i < len(titles)):
+               key = titles[i]
+               sample_titles_and_links[key] = titles_and_links[key]
         
-    return sample_titles_and_links
+   return sample_titles_and_links
     
 
 
-# In[10]:
+# In[109]:
 
 
 def data_frame(message_ids, links, date_contents, username_contents, message_contents, countries, likes, topic_contents, thread_contents):
@@ -111,7 +111,7 @@ def data_frame(message_ids, links, date_contents, username_contents, message_con
     return base_data_frame
 
 
-# In[11]:
+# In[110]:
 
 
 def write_csv(file_name, base_data_frame):
@@ -123,27 +123,39 @@ def write_csv(file_name, base_data_frame):
             writer.writerow(row)
 
 
-# In[16]:
+# In[111]:
 
 
-SAMPLE_SIZE = 2
+SAMPLE_SIZE = 3
+PAGE_SAMPLE_SIZE = 3
 
 
-# In[17]:
+# In[112]:
 
 
 topic_sample_titles_and_links = sample_links(topic_titles_and_links, topic_titles, SAMPLE_SIZE)
-print(topic_sample_titles_and_links)
+##print(topic_sample_titles_and_links)
 
 
-# In[18]:
+# In[113]:
 
 
-print(topic_sample_titles_and_links)
+##print(topic_sample_titles_and_links)
 
 
-# In[ ]:
+# In[114]:
 
+
+
+total_message_ids = list()
+total_links = list()
+total_date_contents = list()
+total_username_contents = list()
+total_message_contents = list()
+total_countries = list()
+total_likes = list()
+total_topic_contents = list()
+total_thread_contents = list()
 
 
 message_ids = list()
@@ -164,9 +176,6 @@ thread_page_counter = 0
 # Random sample
 for key, value in topic_sample_titles_and_links.items():
     counter = counter + 1
-    if counter == 1:
-        print('inside loop', key, value)
-        continue
 
 # For debugging only - COMMENT OUT LATER
    # if counter > 2:
@@ -181,31 +190,34 @@ for key, value in topic_sample_titles_and_links.items():
         page_nav_count = len(topic_content.select('li.pageNav-page'))
         tc_last_page = int(topic_content.select('li.pageNav-page')[page_nav_count - 1].text)
         print("Count of topic pages: " + str(tc_last_page))
+        #tc_last_page = int(re.search('Page \d* of (\d*)', topic_content.select('li.pageNav-page')[0].text).group(1))
     except Exception as i:
-        print(i)
-    for x in range(1, tc_last_page + 1):
+        pass
+        
+    #for x in range(1, tc_last_page + 1):
+    topic_sample = range(1, tc_last_page + 1)
+    if (len(topic_sample) > PAGE_SAMPLE_SIZE):
+        topic_sample = random.sample(topic_sample, PAGE_SAMPLE_SIZE)
+    for x in topic_sample:
 # For debugging only - COMMENT OUT LATER
-      #  if x > 3:
-       #     break
         topic_url = 'https://www.canadavisa.com' + value
         if x > 1:
             topic_url = topic_url + 'page-'+ str(x)
-        print("TOPIC URL: " + topic_url)
+        print("Topic URL: " + topic_url)
         topic_content = bs(requests.get(topic_url).text, 'html.parser')
         threads = topic_content.find_all('div', {'class':'structItem-title'})
         threads_titles = list(map(lambda subtopic: subtopic.find('a').text.strip(), threads))
         thread_titles_and_links = dict(map(lambda subtopic: (subtopic.find('a').text.strip(), subtopic.find('a') ['href']), threads))
-        #print(threads)
+
         # Randomise threads
         thread_sample_titles_and_links = sample_links(thread_titles_and_links, threads_titles, SAMPLE_SIZE)
-        
         thread_counter = 1
-        # For debugging only - COMMENT OUT LATER        
-        #print (thread_titles_and_links)
+
         
         for st_key, st_value in thread_sample_titles_and_links.items():
             thread_counter = thread_counter + 1
             thread_url = 'https://www.canadavisa.com' + st_value
+            print("Thread URL: " + thread_url)
             thread_title = st_key
             thread_content = bs(requests.get(thread_url).text, 'html.parser')
 
@@ -213,30 +225,33 @@ for key, value in topic_sample_titles_and_links.items():
             try:
                 thread_page_nav_count = len(thread_content.select('li.pageNav-page'))
                 #last_page = int(re.search('Page \d* of (\d*)', thread_content.select('li.pageNav-page')[0].text).group(1))
-                last_page = int(thread_content.select('li.pageNav-page')[page_nav_count - 1].text)
+                last_page = int(thread_content.select('li.pageNav-page')[thread_page_nav_count - 1].text)
                 print("Count of thread pages: " + str(last_page))
             except Exception as e: 
-                print(e)
-                
-            for y in range(1, last_page + 1):
+                pass
+            
+            #for y in range(1, last_page):
+            thread_sample = range(1, last_page + 1)
+            if (len(thread_sample) > PAGE_SAMPLE_SIZE):
+                thread_sample = random.sample(thread_sample, PAGE_SAMPLE_SIZE)
+
+            for y in thread_sample:
 # For debugging only - COMMENT OUT LATER
-              #  if y > 3:
-               #     break
+                #if y > 3:
+                #    break
 
                 thread_url = 'https://www.canadavisa.com' + st_value
                 if y > 1:
-                    thread_url = thread_url + 'page-' + str(x)
+                    thread_url = thread_url + 'page-' + str(y)
                     
-                print("THREAD URL: "  + thread_url)
                 thread_content = bs(requests.get(thread_url).text, 'html.parser')
                 #CHANGED - WORKS
                 messages = thread_content.select('div.bbWrapper')
                 #NOT WORKING - IDS CONCEALED 
-                m_ids = thread_content.select('li.message')
-                message_urls = list(map(lambda permLink: permLink['href'], thread_content.select('div.message-attribution-main > a.u-concealed')))
+                message_urls = list(map(lambda permLink: permLink['href'], thread_content.select('div.message-attribution-main > a')))
                 message_reactions = thread_content.select('div.message-userExtras > dl:nth-of-type(3) > dd')
                 message_reactionsbar = thread_content.select('div.reactionsBar')
-                message_reactions = list(map(lambda rb: len(rb.select('bdi')), message_reactionsbar))
+                message_likes = list(map(lambda rb: len(rb.select('bdi')), message_reactionsbar))
                 times = thread_content.select('time')
                 if (times is not None):
                     message_dates = list(map(lambda date: date.decode_contents().strip(), times))
@@ -244,9 +259,13 @@ for key, value in topic_sample_titles_and_links.items():
                 message_list = list(map(lambda message: (message.decode_contents().strip()), messages))
                 usernames_list = list(map(lambda a: a.text.strip(), message_usernames))
                 for idx, m in enumerate(message_list):
-                    message_id = ""
-                    message_ids.append(message_id)
-
+                    #message_id = ""
+                    #try:
+                     #   message_id = re.search('post-(\d*)', m_ids[idx]['id']).group(1)
+                    #except IndexError:
+                     #   message_id = ""
+                    #message_ids.append(message_id)
+                    message_ids.append(0)
                     link = ""
                     try:
                         link = 'https://www.canadavisa.com/' + message_urls[idx]
@@ -272,7 +291,7 @@ for key, value in topic_sample_titles_and_links.items():
                     countries.append("NA")
                     like = 0
                     try:
-                        like = message_reactions[idx]
+                        like = message_likes[idx]
                     except IndexError:
                         like = 0
                     likes.append(like)
@@ -281,6 +300,15 @@ for key, value in topic_sample_titles_and_links.items():
     # Here write the contents to a file, and re-set the data structures
     base_data_frame = data_frame(message_ids, links, date_contents, username_contents, message_contents, countries, likes, topic_contents, thread_contents)
     write_csv("can-forum-" + str(counter) + ".csv", base_data_frame)
+    total_message_ids.extend(message_ids)
+    total_links.extend(links)
+    total_date_contents.extend(date_contents)
+    total_username_contents.extend(username_contents)
+    total_message_contents.extend(message_contents)
+    total_countries.extend(countries)
+    total_likes.extend(likes)
+    total_topic_contents.extend(topic_contents)
+    total_thread_contents.extend(thread_contents)
     message_ids = list()
     links = list()
     date_contents = list()
@@ -290,6 +318,9 @@ for key, value in topic_sample_titles_and_links.items():
     likes = list()
     topic_contents = list()
     thread_contents = list()
+
+total_base_data_frame = data_frame(total_message_ids, total_links, total_date_contents, total_username_contents, total_message_contents, total_countries, total_likes, total_topic_contents, total_thread_contents)    
+write_csv("can-forum-ALL.csv", total_base_data_frame)
 
 
 # In[ ]:
@@ -393,7 +424,7 @@ tc_last_page = int(re.search('Page \d* of (\d*)', topic_content.select('div.page
 # In[ ]:
 
 
-print(tc_last_page)
+print(sample_titles_and_links)
 
 
 # In[ ]:
