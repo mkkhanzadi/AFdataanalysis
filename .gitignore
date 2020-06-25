@@ -104,21 +104,4 @@ venv.bak/
 .mypy_cache/
 
 # Ignore large csv files
-ComparativeDataAnalysis/Aforum_2016.csv
-ComparativeDataAnalysis/Cforum_2016.csv
-ComparativeDataAnalysis/Aforum_affect.csv
-ComparativeDataAnalysis/Cforum_affect.csv
-ComparativeDataAnalysis/Aforum_arrival.csv
-ComparativeDataAnalysis/Cforum_arrival.csv
-ComparativeDataAnalysis/Aforum_aspiration.csv
-ComparativeDataAnalysis/Cforum_aspiration.csv
-ComparativeDataAnalysis/Aforum_cost.csv
-ComparativeDataAnalysis/Cforum_cost.csv
-ComparativeDataAnalysis/Aforum_decison.csv
-ComparativeDataAnalysis/Cforum_decision.csv
-ComparativeDataAnalysis/Aforum_planning.csv
-ComparativeDataAnalysis/Cforum_plan.csv
-ComparativeDataAnalysis/Aforum_skills.csv
-ComparativeDataAnalysis/Cforum_skills.csv
-ComparativeDataAnalysis/Aforum_space.csv
-ComparativeDataAnalysis/Cforum_space.csv
+ComparativeDataAnalysis/*.csv
